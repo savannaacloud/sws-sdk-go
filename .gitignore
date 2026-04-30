@@ -1,0 +1,18 @@
+# Test/coverage
+*.test
+*.out
+coverage.txt
+
+# Build artifacts
+/dist/
+/bin/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Local debug
+debug
+debug.test
