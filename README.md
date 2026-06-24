@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-    client := sws.NewClient("sws_...", sws.WithRegion("ng-lagos-1"))
+    client := sws.NewClient("ctk_...", sws.WithRegion("ng-lagos-1"))
     ctx := context.Background()
 
     // List virtual machines

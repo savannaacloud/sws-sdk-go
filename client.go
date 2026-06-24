@@ -2,7 +2,7 @@
 //
 // Quickstart:
 //
-//	client := sws.NewClient("sws_...", sws.WithRegion("ng-lagos-1"))
+//	client := sws.NewClient("ctk_...", sws.WithRegion("ng-lagos-1"))
 //	instances, err := client.Compute.ListInstances(ctx)
 package sws
 
