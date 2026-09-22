@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -35,10 +34,11 @@ type Client struct {
 	region     string
 	userAgent  string
 
-	Compute  *ComputeService
-	Network  *NetworkService
-	Storage  *StorageService
-	Database *DatabaseService
+	Compute    *ComputeService
+	Network    *NetworkService
+	Storage    *StorageService
+	Database   *DatabaseService
+	credSource string // where apiKey came from — see credentials.go
 }
 
 // Option configures a Client at construction time.
@@ -74,24 +74,24 @@ func WithTimeout(t time.Duration) Option {
 	}
 }
 
-// NewClient returns a Client ready for use. If apiKey is empty, the value
-// of the SWS_API_KEY environment variable is used.
+// NewClient returns a Client ready for use. Pass "" and the credentials are found the
+// way every modern SDK finds them — $SWS_API_KEY, then the file `sws auth login` writes
+// — so a quick start never has to contain a secret. See credentials.go.
 func NewClient(apiKey string, opts ...Option) *Client {
-	if apiKey == "" {
-		apiKey = os.Getenv("SWS_API_KEY")
-	}
+	key, region, baseURL, source := resolveCredentials(apiKey)
 	c := &Client{
-		apiKey:     apiKey,
+		apiKey:     key,
 		baseURL:    defaultBaseURL,
 		region:     defaultRegion,
 		httpClient: &http.Client{Timeout: defaultTimeout},
 		userAgent:  "sws-sdk-go/" + Version,
+		credSource: source,
 	}
-	if v := os.Getenv("SWS_BASE_URL"); v != "" {
-		c.baseURL = v
+	if baseURL != "" {
+		c.baseURL = baseURL
 	}
-	if v := os.Getenv("SWS_REGION"); v != "" {
-		c.region = v
+	if region != "" {
+		c.region = region
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -106,6 +106,10 @@ func NewClient(apiKey string, opts ...Option) *Client {
 // Region returns the region the client is currently scoped to.
 func (c *Client) Region() string { return c.region }
 
+// CredentialSource says where the API key came from — "argument", "SWS_API_KEY", the
+// credentials file, or "none". Useful when a script authenticates as somebody unexpected.
+func (c *Client) CredentialSource() string { return c.credSource }
+
 // do executes an HTTP request and decodes the JSON response into out.
 // If out is nil, the body is discarded but errors are still surfaced.
 // Non-2xx responses are translated into the *Error hierarchy in errors.go.
@@ -113,7 +117,7 @@ func (c *Client) do(ctx context.Context, method, path string, body, out any) err
 	if c.apiKey == "" {
 		return &AuthenticationError{&APIError{
 			StatusCode: 401,
-			Message:    "missing api key (pass to NewClient or set SWS_API_KEY env var)",
+			Message:    MissingCredentials,
 		}}
 	}
 
