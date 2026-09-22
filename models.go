@@ -5,14 +5,14 @@ import "encoding/json"
 // Instance is a virtual machine. The "Plan" field carries what the
 // underlying platform calls a flavor — same shape, friendlier name.
 type Instance struct {
-	ID        string                 `json:"id"`
-	Name      string                 `json:"name"`
-	Status    string                 `json:"status"`
-	Plan      map[string]any         `json:"flavor,omitempty"` // backend uses "flavor" key
-	Image     map[string]any         `json:"image,omitempty"`
-	Addresses map[string]any         `json:"addresses,omitempty"`
-	KeyName   string                 `json:"key_name,omitempty"`
-	Created   string                 `json:"created,omitempty"`
+	ID        string                     `json:"id"`
+	Name      string                     `json:"name"`
+	Status    string                     `json:"status"`
+	Plan      map[string]any             `json:"flavor,omitempty"` // backend uses "flavor" key
+	Image     map[string]any             `json:"image,omitempty"`
+	Addresses map[string]any             `json:"addresses,omitempty"`
+	KeyName   string                     `json:"key_name,omitempty"`
+	Created   string                     `json:"created,omitempty"`
 	Raw       map[string]json.RawMessage `json:"-"`
 }
 
@@ -58,9 +58,9 @@ type Subnet struct {
 
 // SecurityGroup is a layer-4 firewall rule set.
 type SecurityGroup struct {
-	ID          string             `json:"id"`
-	Name        string             `json:"name"`
-	Description string             `json:"description,omitempty"`
+	ID          string              `json:"id"`
+	Name        string              `json:"name"`
+	Description string              `json:"description,omitempty"`
 	Rules       []SecurityGroupRule `json:"security_group_rules,omitempty"`
 }
 
@@ -85,11 +85,11 @@ type PublicIP struct {
 
 // Volume is a block-storage volume.
 type Volume struct {
-	ID         string             `json:"id"`
-	Name       string             `json:"name"`
-	Size       int                `json:"size"` // GB
-	Status     string             `json:"status,omitempty"`
-	Type       string             `json:"volume_type,omitempty"`
+	ID          string             `json:"id"`
+	Name        string             `json:"name"`
+	Size        int                `json:"size"` // GB
+	Status      string             `json:"status,omitempty"`
+	Type        string             `json:"volume_type,omitempty"`
 	Attachments []VolumeAttachment `json:"attachments,omitempty"`
 }
 
@@ -101,11 +101,11 @@ type VolumeAttachment struct {
 
 // Database is a managed database instance (mysql, postgresql, ...).
 type Database struct {
-	ID        string         `json:"id"`
-	Name      string         `json:"name"`
+	ID        string          `json:"id"`
+	Name      string          `json:"name"`
 	Datastore json.RawMessage `json:"datastore,omitempty"`
-	Status    string         `json:"status,omitempty"`
-	Plan      map[string]any `json:"flavor,omitempty"`
+	Status    string          `json:"status,omitempty"`
+	Plan      map[string]any  `json:"flavor,omitempty"`
 }
 
 // ── Request option structs ──────────────────────────────────────────────

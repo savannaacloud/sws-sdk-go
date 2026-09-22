@@ -17,7 +17,7 @@ func newTestServer(t *testing.T, handler http.HandlerFunc) (*httptest.Server, *C
 	t.Helper()
 	srv := httptest.NewServer(handler)
 	t.Cleanup(srv.Close)
-	client := NewClient("sws_test", WithBaseURL(srv.URL), WithRegion("ng-lagos-1"))
+	client := NewClient("ctk_test", WithBaseURL(srv.URL), WithRegion("ng-lagos-1"))
 	return srv, client
 }
 
@@ -43,8 +43,8 @@ func TestAuthHeaderAndRegionSent(t *testing.T) {
 	if _, err := client.Compute.ListInstances(context.Background()); err != nil {
 		t.Fatal(err)
 	}
-	if gotAuth != "Bearer sws_test" {
-		t.Errorf("Authorization = %q, want %q", gotAuth, "Bearer sws_test")
+	if gotAuth != "Bearer ctk_test" {
+		t.Errorf("Authorization = %q, want %q", gotAuth, "Bearer ctk_test")
 	}
 	if gotRegion != "ng-lagos-1" {
 		t.Errorf("x-region = %q, want %q", gotRegion, "ng-lagos-1")

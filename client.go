@@ -13,11 +13,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
 // Version is the SDK version reported in the User-Agent header.
-const Version = "0.1.1"
+const Version = "0.1.2"
 
 const (
 	defaultBaseURL = "https://savannaa.com"
@@ -51,7 +52,9 @@ func WithRegion(region string) Option {
 }
 
 // WithBaseURL overrides the API base URL.
-// Default: "https://savannaa.com" (or $SWS_BASE_URL).
+// Default: "https://savannaa.com" (or $SWS_API_URL / $SWS_BASE_URL).
+// A trailing "/api" or "/api/v1" is accepted and not doubled — every request is
+// pinned to /api/v1 so a future API version cannot move you.
 func WithBaseURL(baseURL string) Option {
 	return func(c *Client) { c.baseURL = baseURL }
 }
@@ -96,11 +99,27 @@ func NewClient(apiKey string, opts ...Option) *Client {
 	for _, opt := range opts {
 		opt(c)
 	}
+	c.baseURL = normalizeBaseURL(c.baseURL)
 	c.Compute = &ComputeService{client: c}
 	c.Network = &NetworkService{client: c}
 	c.Storage = &StorageService{client: c}
 	c.Database = &DatabaseService{client: c}
 	return c
+}
+
+// normalizeBaseURL strips an API prefix the caller already supplied.
+//
+// GET /api/v1/version publishes base_url as "https://savannaa.com/api/v1", so people
+// paste exactly that into $SWS_API_URL. Without this, every request would go to
+// /api/v1/api/v1/... and 404.
+func normalizeBaseURL(baseURL string) string {
+	baseURL = strings.TrimRight(baseURL, "/")
+	for _, suffix := range []string{"/api/v1", "/api"} {
+		if strings.HasSuffix(baseURL, suffix) {
+			return strings.TrimSuffix(baseURL, suffix)
+		}
+	}
+	return baseURL
 }
 
 // Region returns the region the client is currently scoped to.
